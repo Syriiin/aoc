@@ -4,18 +4,35 @@ defmodule Day1 do
     String.split(string, "\n", trim: true)
   end
 
-  def is_digit(string) do
-    case Integer.parse(string) do
-      :error -> false
-      _ -> true
+  # Return list of digits in the string, transforming spelled digits to numeric representation
+  def get_digits(string) do
+    case string do
+      "1" <> _ -> ["1" | get_digits(String.slice(string, 1..-1))]
+      "2" <> _ -> ["2" | get_digits(String.slice(string, 1..-1))]
+      "3" <> _ -> ["3" | get_digits(String.slice(string, 1..-1))]
+      "4" <> _ -> ["4" | get_digits(String.slice(string, 1..-1))]
+      "5" <> _ -> ["5" | get_digits(String.slice(string, 1..-1))]
+      "6" <> _ -> ["6" | get_digits(String.slice(string, 1..-1))]
+      "7" <> _ -> ["7" | get_digits(String.slice(string, 1..-1))]
+      "8" <> _ -> ["8" | get_digits(String.slice(string, 1..-1))]
+      "9" <> _ -> ["9" | get_digits(String.slice(string, 1..-1))]
+      "one" <> _ -> ["1" | get_digits(String.slice(string, 1..-1))]
+      "two" <> _ -> ["2" | get_digits(String.slice(string, 1..-1))]
+      "three" <> _ -> ["3" | get_digits(String.slice(string, 1..-1))]
+      "four" <> _ -> ["4" | get_digits(String.slice(string, 1..-1))]
+      "five" <> _ -> ["5" | get_digits(String.slice(string, 1..-1))]
+      "six" <> _ -> ["6" | get_digits(String.slice(string, 1..-1))]
+      "seven" <> _ -> ["7" | get_digits(String.slice(string, 1..-1))]
+      "eight" <> _ -> ["8" | get_digits(String.slice(string, 1..-1))]
+      "nine" <> _ -> ["9" | get_digits(String.slice(string, 1..-1))]
+      "" -> []
+      _ -> get_digits(String.slice(string, 1..-1))
     end
   end
 
   # Return list of digits (integer or spelled) from string
   def filter_digits(line) do
-    line
-    |> String.split("", trim: true)
-    |> Enum.filter(&is_digit/1)
+    get_digits(line)
   end
 
   # Return line value from list of digits
@@ -42,6 +59,7 @@ defmodule Day1 do
       {:ok, input} ->
         process_input(input)
         |> inspect()
+        |> (&("Answer: " <> &1)).()
         |> IO.puts()
 
       {:error, _} ->
