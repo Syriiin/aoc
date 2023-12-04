@@ -59,12 +59,61 @@ defmodule Day2 do
     |> Enum.sum()
   end
 
+  # Return tuple of {colour, count} for colour string
+  defp to_colour_map(colour_string) do
+    [count_string | [colour]] = String.split(colour_string)
+    {colour, String.to_integer(count_string)}
+  end
+
+  # Return map of colour => count for round
+  defp to_round_map(round_string) do
+    round_string
+    |> String.split(", ")
+    |> Enum.map(&to_colour_map/1)
+    |> Map.new()
+  end
+
+  # Return map with max of each value between the two maps
+  defp merge_max(map1, map2) do
+    Map.merge(map1, map2, fn _k, v1, v2 -> max(v1, v2) end)
+  end
+
+  # Return power of max colours from line
+  defp to_part_2_line_value(line) do
+    [_ | [game_string]] = String.split(line, ": ")
+
+    game_string
+    |> String.split("; ")
+    |> Enum.map(&to_round_map/1)
+    |> Enum.reduce(%{}, fn colour_map, acc -> merge_max(acc, colour_map) end)
+    |> Map.values()
+    |> Enum.product()
+  end
+
+  # Return list of values from line string
+  defp to_part_2_line_values(line_list) do
+    line_list
+    |> Enum.map(&to_part_2_line_value/1)
+  end
+
+  defp process_input_part_2(input) do
+    input
+    |> to_lines()
+    |> to_part_2_line_values()
+    |> Enum.sum()
+  end
+
   def main(path) do
     case File.read(path) do
       {:ok, input} ->
         process_input(input)
         |> inspect(pretty: true)
-        |> (&("Answer: " <> &1)).()
+        |> (&("Part 1 Answer: " <> &1)).()
+        |> IO.puts()
+
+        process_input_part_2(input)
+        |> inspect(pretty: true)
+        |> (&("Part 2 Answer: " <> &1)).()
         |> IO.puts()
 
       {:error, _} ->
