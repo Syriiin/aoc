@@ -25,9 +25,9 @@ defmodule Day3 do
       <<"\n", rest::binary>> ->
         do_parse_components(rest, row + 1, 0)
 
-      <<_symbol, rest::binary>> ->
+      <<symbol, rest::binary>> ->
         [
-          %{type: :symbol, row: row, column: column}
+          %{type: :symbol, symbol: <<symbol>>, row: row, column: column}
           | do_parse_components(rest, row, column + 1)
         ]
 
@@ -36,38 +36,92 @@ defmodule Day3 do
     end
   end
 
-  # Return list of maps per components: [%{type: :symbol, row: 0, column: 0}, %{type: :number, value: 823, row_range: 0..2, column_range: 0..4}]
+  # Return list of maps per components: [%{type: :symbol, symbol: "*", row: 0, column: 0}, %{type: :number, value: 823, row_range: 0..2, column_range: 0..4}]
   defp parse_components(schematic) do
-    do_parse_components(schematic, 0, 0)
+    components = do_parse_components(schematic, 0, 0)
+
+    %{
+      symbols: Enum.filter(components, fn c -> c.type == :symbol end),
+      numbers: Enum.filter(components, fn c -> c.type == :number end)
+    }
+  end
+
+  # Check if a given symbol and number are adjacent
+  defp is_adjacent?(symbol, number) do
+    symbol.row in number.row_range and symbol.column in number.column_range
   end
 
   # Check if number is adjacent to any symbols by checking range overlaps
   defp is_part_number?(number, symbols) do
-    Enum.any?(symbols, fn s -> s.row in number.row_range and s.column in number.column_range end)
+    Enum.any?(symbols, fn s -> is_adjacent?(s, number) end)
   end
 
   # Find part numbers from collection of components
   defp get_part_numbers(components) do
-    components.number
-    |> Enum.filter(fn n -> is_part_number?(n, components.symbol) end)
+    components.numbers
+    |> Enum.filter(fn n -> is_part_number?(n, components.symbols) end)
   end
 
-  # Get part number sum from schematic
-  defp process_input(schematic) do
-    schematic
-    |> parse_components()
-    |> Enum.group_by(fn m -> m.type end, fn m -> Map.pop(m, :type) |> elem(1) end)
-    |> get_part_numbers()
+  # Get list of gears by checking adjacent numbers
+  defp get_gears(symbols, numbers) do
+    Enum.reduce(symbols, [], fn s, acc ->
+      adjacent_numbers = Enum.filter(numbers, fn n -> is_adjacent?(s, n) end)
+
+      case length(adjacent_numbers) do
+        2 -> [%{gear: s, numbers: adjacent_numbers} | acc]
+        _ -> acc
+      end
+    end)
+  end
+
+  # Calculate the gear ratio of a given gear
+  defp get_gear_ratio(gear) do
+    gear.numbers
     |> Enum.map(fn n -> n.value end)
-    |> Enum.sum()
+    |> Enum.product()
+  end
+
+  # Get gear ratios from component map
+  defp get_gear_ratios(components) do
+    components.symbols
+    |> get_gears(components.numbers)
+    |> Enum.map(&get_gear_ratio/1)
+  end
+
+  # Get part number sum and gear ratio sum from schematic
+  defp process_input(schematic) do
+    components = parse_components(schematic)
+
+    part_number_sum =
+      components
+      |> get_part_numbers()
+      |> Enum.map(fn n -> n.value end)
+      |> Enum.sum()
+
+    gear_ratio_sum =
+      components
+      |> get_gear_ratios()
+      |> Enum.sum()
+
+    %{
+      part1: part_number_sum,
+      part2: gear_ratio_sum
+    }
   end
 
   def main(path) do
     case File.read(path) do
       {:ok, input} ->
-        process_input(input)
+        result = process_input(input)
+
+        result.part1
         |> inspect(pretty: true)
         |> (&("Part 1 Answer: " <> &1)).()
+        |> IO.puts()
+
+        result.part2
+        |> inspect(pretty: true)
+        |> (&("Part 2 Answer: " <> &1)).()
         |> IO.puts()
 
       {:error, _} ->
