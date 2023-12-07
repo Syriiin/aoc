@@ -88,7 +88,7 @@ defmodule AlmanacMap do
 end
 
 defmodule Almanac do
-  defstruct seeds: [], maps: []
+  defstruct part1_seeds: [], part2_seeds: [], maps: []
 
   # Return list of seeds
   defp parse_almanac_seeds(seed_line) do
@@ -111,11 +111,21 @@ defmodule Almanac do
     end
   end
 
+  defp calculate_part2_seeds(seeds) do
+    seeds
+    |> Enum.chunk_every(2)
+    |> Enum.map(fn [x | [y]] -> Range.to_list(x..(x + (y - 1))) end)
+    |> List.flatten()
+  end
+
   defp parse_almanac_lines(almanac_lines) do
     [seed_line | map_lines] = almanac_lines
 
+    seeds = parse_almanac_seeds(seed_line)
+
     %Almanac{
-      seeds: parse_almanac_seeds(seed_line),
+      part1_seeds: seeds,
+      part2_seeds: calculate_part2_seeds(seeds),
       maps: parse_almanac_maps(map_lines)
     }
   end
@@ -131,8 +141,12 @@ defmodule Almanac do
     Enum.reduce(almanac.maps, seed, fn map, acc -> AlmanacMap.map_value(map, acc) end)
   end
 
-  def lowest_location(almanac) do
-    almanac.seeds
+  def lowest_location(_, []) do
+    :error
+  end
+
+  def lowest_location(almanac, seeds) do
+    seeds
     |> Enum.map(fn s -> location(almanac, s) end)
     |> Enum.min()
   end
@@ -142,11 +156,9 @@ defmodule Day5 do
   defp process_input(almanac_string) do
     almanac = Almanac.parse(almanac_string)
 
-    lowest_location = Almanac.lowest_location(almanac)
-
     %{
-      part1: lowest_location,
-      part2: nil
+      part1: Almanac.lowest_location(almanac, almanac.part1_seeds),
+      part2: Almanac.lowest_location(almanac, almanac.part2_seeds)
     }
   end
 
