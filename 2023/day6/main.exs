@@ -15,6 +15,17 @@ defmodule Day6 do
     end)
   end
 
+  defp parse_single_race(race_timesheet) do
+    [time_line, distance_line] = race_timesheet |> to_lines()
+    ["Time:" | time_strings] = time_line |> String.split()
+    ["Distance:" | distance_strings] = distance_line |> String.split()
+
+    %{
+      duration: Enum.join(time_strings) |> String.to_integer(),
+      record_distance: Enum.join(distance_strings) |> String.to_integer()
+    }
+  end
+
   defp get_possible_outcomes(duration) do
     0..duration
     |> Enum.map(fn hold_time -> {hold_time, (duration - hold_time) * hold_time} end)
@@ -35,9 +46,14 @@ defmodule Day6 do
       |> Enum.map(&count_win_options/1)
       |> Enum.product()
 
+    part2 =
+      input_string
+      |> parse_single_race()
+      |> count_win_options()
+
     %{
       part1: part1,
-      part2: nil
+      part2: part2
     }
   end
 
