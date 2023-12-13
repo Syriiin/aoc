@@ -31,3 +31,7 @@ Let's try using structs today and OH MY GOD PART 2 OUT OF NOWHERE!
 #### Day 6
 
 Oh no part 2 is going to make me do a binary search to find the upper and lowe-... oh nevermind that only took a couple seconds to bruteforce.
+
+#### Day 7
+
+In general I reckon there were more elegant ways to do this but it's alright I guess...
