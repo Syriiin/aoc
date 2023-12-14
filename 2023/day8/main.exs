@@ -38,6 +38,10 @@ defmodule Day8 do
     }
   end
 
+  defp do_follow_map(nil, _, _) do
+    [:error]
+  end
+
   # Returns list of tuples of location and direction: [{"AAA", :left}, ...]
   defp do_follow_map(current_location, locations, directions) do
     current_direction = hd(directions)
@@ -64,6 +68,35 @@ defmodule Day8 do
     do_follow_map("AAA", map.locations, map.directions)
   end
 
+  # Returns list of tuples of locations and direction: [{["AAA", "BBB"], :left}, ...]
+  defp do_ghost_follow_map(current_locations, locations, directions) do
+    current_direction = hd(directions)
+    new_locations = Enum.map(current_locations, fn l -> locations[l][current_direction] end)
+
+    if Enum.all?(new_locations, fn l -> String.ends_with?(l, "Z") end) do
+      [current_direction]
+    else
+      [
+        current_direction
+        | do_ghost_follow_map(
+            new_locations,
+            locations,
+            # somehow its faster to repeatedly append list head to tail than use Stream.cycle/1???
+            tl(directions) ++ [current_direction]
+          )
+      ]
+    end
+  end
+
+  defp ghost_follow_map(map) do
+    starting_locations =
+      map.locations
+      |> Map.keys()
+      |> Enum.filter(fn l -> String.ends_with?(l, "A") end)
+
+    do_ghost_follow_map(starting_locations, map.locations, map.directions)
+  end
+
   defp process_input(input_string) do
     map =
       input_string
@@ -73,9 +106,13 @@ defmodule Day8 do
       follow_map(map)
       |> length()
 
+    ghost_step_count_to_escape =
+      ghost_follow_map(map)
+      |> length()
+
     %{
       part1: step_count_to_escape,
-      part2: nil
+      part2: ghost_step_count_to_escape
     }
   end
 
@@ -88,7 +125,7 @@ defmodule Day8 do
         IO.puts("Part 2 Answer: " <> inspect(result.part2, pretty: true))
 
       {:error, _} ->
-        IO.puts("unable to read" <> path <> "\nexiting...")
+        IO.puts("unable to read " <> path <> "\nexiting...")
         System.halt(1)
     end
   end
