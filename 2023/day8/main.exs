@@ -38,17 +38,20 @@ defmodule Day8 do
     }
   end
 
-  defp do_follow_map(nil, _, _) do
+  defp do_follow_map(nil, _, _, _) do
     [:error]
   end
 
   # Returns list of tuples of location and direction: [{"AAA", :left}, ...]
-  defp do_follow_map(current_location, locations, directions) do
+  defp do_follow_map(current_location, locations, directions, ghost_mode) do
     current_direction = hd(directions)
     new_location = locations[current_location][current_direction]
 
     case new_location do
-      "ZZZ" ->
+      "ZZZ" when ghost_mode == false ->
+        [{current_location, current_direction}]
+
+      <<_::binary-size(2), "Z">> when ghost_mode == true ->
         [{current_location, current_direction}]
 
       _ ->
@@ -58,61 +61,51 @@ defmodule Day8 do
               new_location,
               locations,
               # somehow its faster to repeatedly append list head to tail than use Stream.cycle/1???
-              tl(directions) ++ [current_direction]
+              tl(directions) ++ [current_direction],
+              ghost_mode
             )
         ]
     end
   end
 
-  defp follow_map(map) do
-    do_follow_map("AAA", map.locations, map.directions)
+  defp follow_map(map, starting_point, ghost_mode) do
+    do_follow_map(starting_point, map.locations, map.directions, ghost_mode)
   end
 
-  # Returns list of tuples of locations and direction: [{["AAA", "BBB"], :left}, ...]
-  defp do_ghost_follow_map(current_locations, locations, directions) do
-    current_direction = hd(directions)
-    new_locations = Enum.map(current_locations, fn l -> locations[l][current_direction] end)
-
-    if Enum.all?(new_locations, fn l -> String.ends_with?(l, "Z") end) do
-      [current_direction]
-    else
-      [
-        current_direction
-        | do_ghost_follow_map(
-            new_locations,
-            locations,
-            # somehow its faster to repeatedly append list head to tail than use Stream.cycle/1???
-            tl(directions) ++ [current_direction]
-          )
-      ]
-    end
+  defp calculate_steps_to_escape(map) do
+    map
+    |> follow_map("AAA", false)
+    |> length()
   end
 
-  defp ghost_follow_map(map) do
+  defp lcm(a, b) do
+    div(a * b, Integer.gcd(a, b))
+  end
+
+  defp find_lowest_common_multiple(numbers) do
+    Enum.reduce(numbers, fn x, acc -> lcm(acc, x) end)
+  end
+
+  defp calculate_ghost_steps_to_escape(map) do
     starting_locations =
       map.locations
       |> Map.keys()
       |> Enum.filter(fn l -> String.ends_with?(l, "A") end)
 
-    do_ghost_follow_map(starting_locations, map.locations, map.directions)
+    steps_required =
+      Enum.map(starting_locations, fn l ->
+        follow_map(map, l, true) |> length()
+      end)
+
+    find_lowest_common_multiple(steps_required)
   end
 
   defp process_input(input_string) do
-    map =
-      input_string
-      |> parse_map()
-
-    step_count_to_escape =
-      follow_map(map)
-      |> length()
-
-    ghost_step_count_to_escape =
-      ghost_follow_map(map)
-      |> length()
+    map = parse_map(input_string)
 
     %{
-      part1: step_count_to_escape,
-      part2: ghost_step_count_to_escape
+      part1: calculate_steps_to_escape(map),
+      part2: calculate_ghost_steps_to_escape(map)
     }
   end
 
@@ -132,3 +125,6 @@ defmodule Day8 do
 end
 
 Day8.main("input.txt")
+
+# to solve this, we're going to need to identify the cadence of repeating patterns in each path and extrapolate until the start/end points match
+# in other words, we need to count how many steps it takes for each starting point, and find the LCM of those numbers

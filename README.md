@@ -35,3 +35,7 @@ Oh no part 2 is going to make me do a binary search to find the upper and lowe-.
 #### Day 7
 
 In general I reckon there were more elegant ways to do this but it's alright I guess...
+
+#### Day 8
+
+Spent way too long trying to remember how to calculate LCM by hand before looking it up.
