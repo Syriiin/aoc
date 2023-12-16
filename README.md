@@ -39,3 +39,7 @@ In general I reckon there were more elegant ways to do this but it's alright I g
 #### Day 8
 
 Spent way too long trying to remember how to calculate LCM by hand before looking it up.
+
+#### Day 9
+
+That's it...?

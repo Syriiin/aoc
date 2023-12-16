@@ -15,15 +15,17 @@ defmodule Day9 do
     |> Enum.map(&parse_sequence/1)
   end
 
+  defp get_derivative_sequence(sequence) do
+    sequence
+    |> Enum.chunk_every(2, 1, :discard)
+    |> Enum.map(fn [x1, x2] -> x2 - x1 end)
+  end
+
   defp find_next_value(sequence) do
     if Enum.all?(sequence, fn x -> x == 0 end) do
       0
     else
-      derivative_sequence =
-        sequence
-        |> Enum.chunk_every(2, 1, :discard)
-        |> Enum.map(fn [x1, x2] -> x2 - x1 end)
-
+      derivative_sequence = get_derivative_sequence(sequence)
       List.last(sequence) + find_next_value(derivative_sequence)
     end
   end
@@ -32,16 +34,35 @@ defmodule Day9 do
     Enum.map(sequences, &find_next_value/1)
   end
 
+  defp find_previous_value(sequence) do
+    if Enum.all?(sequence, fn x -> x == 0 end) do
+      0
+    else
+      derivative_sequence = get_derivative_sequence(sequence)
+      List.first(sequence) - find_previous_value(derivative_sequence)
+    end
+  end
+
+  defp find_previous_values(sequences) do
+    Enum.map(sequences, &find_previous_value/1)
+  end
+
   defp process_input(input_string) do
+    sequences = parse_sequences(input_string)
+
     next_value_sum =
-      input_string
-      |> parse_sequences()
+      sequences
       |> find_next_values()
+      |> Enum.sum()
+
+    previous_value_sum =
+      sequences
+      |> find_previous_values()
       |> Enum.sum()
 
     %{
       part1: next_value_sum,
-      part2: nil
+      part2: previous_value_sum
     }
   end
 
