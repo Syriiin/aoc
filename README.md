@@ -43,3 +43,7 @@ Spent way too long trying to remember how to calculate LCM by hand before lookin
 #### Day 9
 
 That's it...?
+
+#### Day 10
+
+That was definitely the ugliest and least optimal code I've written so far... but atleast the output is pretty!
