@@ -33,9 +33,13 @@ defmodule Day1 do
       |> get_distances()
       |> Enum.sum()
 
+    similarity_score =
+      {left_list, right_list}
+      |> get_similarity_score()
+
     %{
       part1: total_distance,
-      part2: nil
+      part2: similarity_score
     }
   end
 
@@ -66,6 +70,22 @@ defmodule Day1 do
     |> Enum.zip(right_list)
     |> Enum.map(fn {loc1, loc2} -> abs(loc1 - loc2) end)
   end
+
+  defp get_similarity_score({left_list, right_list}) do
+    right_list_counts =
+      left_list
+      |> Enum.map(fn x -> get_count_in_list(right_list, x) end)
+
+    left_list
+    |> Enum.zip(right_list_counts)
+    |> Enum.map(fn {x, count} -> x * count end)
+    |> Enum.sum()
+  end
+
+  defp get_count_in_list(list, item) do
+    list
+    |> Enum.count(fn x -> x == item end)
+  end
 end
 
-Day1.main("input.example.txt")
+Day1.main("input.txt")

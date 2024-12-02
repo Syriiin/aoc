@@ -47,3 +47,11 @@ That's it...?
 #### Day 10
 
 That was definitely the ugliest and least optimal code I've written so far... but atleast the output is pretty!
+
+### 2024
+
+Let's try learning vim motions.
+
+#### Day 1
+
+I need more than hjkl. I keep reverting to arrow keys in insert mode...
