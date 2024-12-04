@@ -59,3 +59,7 @@ I need more than hjkl. I keep reverting to arrow keys in insert mode...
 #### Day 2
 
 I spent WAY too damn long trying to write a non-bruteforce solution.
+
+#### Day 3
+
+I need to learn to use visual mode and yank better. I keep trying to copy paste!
