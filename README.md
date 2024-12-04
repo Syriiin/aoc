@@ -55,3 +55,7 @@ Let's try learning vim motions.
 #### Day 1
 
 I need more than hjkl. I keep reverting to arrow keys in insert mode...
+
+#### Day 2
+
+I spent WAY too damn long trying to write a non-bruteforce solution.

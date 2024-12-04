@@ -33,9 +33,14 @@ defmodule Day2 do
       |> Enum.map(&is_safe_report/1)
       |> Enum.count(fn x -> x end)
 
+    tolerant_safe_report_count =
+      reports
+      |> Enum.map(&is_tolerant_safe_report_brute/1)
+      |> Enum.count(fn x -> x end)
+
     %{
       part1: safe_report_count,
-      part2: nil
+      part2: tolerant_safe_report_count
     }
   end
 
@@ -50,35 +55,36 @@ defmodule Day2 do
   end
 
   defp is_safe_report(report) do
-    is_safe_ascending_report(report) || is_safe_descending_report(report)
+    is_safe_levels(report) || is_safe_levels(Enum.reverse(report))
   end
 
-  defp is_safe_ascending_report(report) do
+  defp is_tolerant_safe_report_brute(report) do
     report
-    |> Enum.chunk_every(2, 1)
-    |> Enum.all?(&is_safe_ascending_level/1)
+    |> get_one_missing_permutations()
+    |> Enum.any?(&is_safe_report/1)
   end
 
-  defp is_safe_ascending_level([x1, x2]) do
+  defp get_one_missing_permutations(levels) do
+    0..(Enum.count(levels) - 1)
+    |> Range.to_list()
+    |> Enum.map(fn i -> levels_minus_value_at_index(levels, i) end)
+  end
+
+  defp levels_minus_value_at_index(levels, i) do
+    {first, second} = Enum.split(levels, i)
+    first ++ tl(second)
+  end
+
+  defp is_safe_levels([_]) do
+    true
+  end
+
+  defp is_safe_levels([x1, x2 | rest_levels]) do
+    is_safe_level_change(x1, x2) && is_safe_levels([x2 | rest_levels])
+  end
+
+  defp is_safe_level_change(x1, x2) do
     x2 > x1 && x2 - x1 <= 3
-  end
-
-  defp is_safe_ascending_level([_x]) do
-    true
-  end
-
-  defp is_safe_descending_report(report) do
-    report
-    |> Enum.chunk_every(2, 1)
-    |> Enum.all?(&is_safe_descending_level/1)
-  end
-
-  defp is_safe_descending_level([x1, x2]) do
-    x2 < x1 && x1 - x2 <= 3
-  end
-
-  defp is_safe_descending_level([_x]) do
-    true
   end
 end
 
