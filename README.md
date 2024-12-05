@@ -63,3 +63,7 @@ I spent WAY too damn long trying to write a non-bruteforce solution.
 #### Day 3
 
 I need to learn to use visual mode and yank better. I keep trying to copy paste!
+
+#### Day 4
+
+Okay today was slightly better at avoiding arrow keys, and getting used to relative jumps. I've definitely forgotten most of the elixir knowledge I gained last year though.
