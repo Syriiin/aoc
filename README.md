@@ -67,3 +67,7 @@ I need to learn to use visual mode and yank better. I keep trying to copy paste!
 #### Day 4
 
 Okay today was slightly better at avoiding arrow keys, and getting used to relative jumps. I've definitely forgotten most of the elixir knowledge I gained last year though.
+
+#### Day 5
+
+Oh man part 2 had me stumped for a while, and then all of a sudden the lightbulb moment hit. I'm pretty sure that's one of the cleanest part 2 solutions I've had so far. Oh and vim felt a little less frustrating today.

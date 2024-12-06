@@ -31,9 +31,16 @@ defmodule Day5 do
       |> Enum.map(&get_middle_page/1)
       |> Enum.sum()
 
+    corrected_update_middle_page_sum =
+      updates
+      |> Enum.filter(fn update -> not is_update_correctly_ordered?(update, rules) end)
+      |> Enum.map(fn update -> fix_update_order(update, rules) end)
+      |> Enum.map(&get_middle_page/1)
+      |> Enum.sum()
+
     %{
       part1: correctly_ordered_update_middle_page_sum,
-      part2: nil
+      part2: corrected_update_middle_page_sum
     }
   end
 
@@ -89,6 +96,10 @@ defmodule Day5 do
   defp get_middle_page(update) do
     page_count = Enum.count(update)
     Enum.at(update, floor(page_count / 2))
+  end
+
+  defp fix_update_order(update, rules) do
+    Enum.sort(update, fn a, b -> is_update_correctly_ordered?([a, b], rules) end)
   end
 end
 
