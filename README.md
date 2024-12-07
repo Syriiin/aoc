@@ -71,3 +71,7 @@ Okay today was slightly better at avoiding arrow keys, and getting used to relat
 #### Day 5
 
 Oh man part 2 had me stumped for a while, and then all of a sudden the lightbulb moment hit. I'm pretty sure that's one of the cleanest part 2 solutions I've had so far. Oh and vim felt a little less frustrating today.
+
+#### Day 6
+
+That part 2 had me stuck for so long... the example just worked so easily, but not the real thing... I don't want to talk about it pacman, I don't want to talk about it...

@@ -26,14 +26,25 @@ defmodule Day6 do
     %{map: map, guard_position: guard_position} =
       parse_map(input)
 
-    traversed_tile_count =
+    traversed_positions =
       map
       |> process_map_traversal(guard_position)
-      |> count_traversed_tiles()
+      |> Enum.reverse()
+
+    traversed_tile_count =
+      traversed_positions
+      |> Enum.map(fn position -> position_to_location(position) end)
+      |> Enum.sort()
+      |> Enum.dedup()
+      |> Enum.count()
+
+    looping_obstacles_count =
+      find_looping_obstacles(map, guard_position, traversed_positions)
+      |> Enum.count()
 
     %{
       part1: traversed_tile_count,
-      part2: nil
+      part2: looping_obstacles_count
     }
   end
 
@@ -74,20 +85,25 @@ defmodule Day6 do
     end
   end
 
-  defp mark_tile(map, row_index, col_index) do
+  defp mark_tile(map, row_index, col_index, marker \\ "X") do
     row = Enum.at(map, row_index)
-    List.replace_at(map, row_index, List.replace_at(row, col_index, "X"))
+    List.replace_at(map, row_index, List.replace_at(row, col_index, marker))
   end
 
-  defp process_map_traversal(map, guard_position) do
+  defp process_map_traversal(map, guard_position, past_positions \\ []) do
     new_guard_position = get_next_guard_position(map, guard_position)
 
-    if is_guard_out_of_bounds?(map, new_guard_position) do
-      map
-    else
-      {row_index, col_index, _direction} = new_guard_position
-      new_map = mark_tile(map, row_index, col_index)
-      process_map_traversal(new_map, new_guard_position)
+    cond do
+      is_guard_out_of_bounds?(map, new_guard_position) ->
+        [guard_position | past_positions]
+
+      Enum.member?(past_positions, new_guard_position) ->
+        nil
+
+      true ->
+        {row_index, col_index, _direction} = new_guard_position
+        new_map = mark_tile(map, row_index, col_index)
+        process_map_traversal(new_map, new_guard_position, [guard_position | past_positions])
     end
   end
 
@@ -124,23 +140,51 @@ defmodule Day6 do
   end
 
   defp obstacle_at_location?(map, row_index, col_index) do
-    get_tile_at_location(map, row_index, col_index) == "#"
+    tile = get_tile_at_location(map, row_index, col_index)
+    tile == "#" or tile == "O"
   end
 
   defp get_tile_at_location(map, row_index, col_index) do
-    row = Enum.at(map, row_index)
-
-    if row == nil do
+    if row_index < 0 or col_index < 0 do
       nil
     else
-      Enum.at(row, col_index)
+      row = Enum.at(map, row_index)
+
+      if row == nil do
+        nil
+      else
+        Enum.at(row, col_index)
+      end
     end
   end
 
-  defp count_traversed_tiles(map) do
-    map
-    |> Enum.map(fn row -> Enum.count(row, fn tile -> tile == "X" end) end)
-    |> Enum.sum()
+  defp position_to_location({row_index, col_index, _direction}) do
+    {row_index, col_index}
+  end
+
+  defp find_looping_obstacles(map, starting_position, traversed_positions) do
+    starting_location = position_to_location(starting_position)
+
+    traversed_positions
+    |> Enum.chunk_every(2, 1)
+    |> Enum.filter(fn x -> Enum.count(x) == 2 end)
+    |> Enum.map(fn [start_pos, position] -> [start_pos, position_to_location(position)] end)
+    |> Enum.filter(fn [_start_pos, location] -> location != starting_location end)
+    |> Enum.dedup_by(fn [_start_pos, location] -> location end)
+    |> Enum.filter(fn [start_pos, location] -> position_to_location(start_pos) != location end)
+    |> Enum.sort_by(fn [_start_pos, location] -> location end)
+    |> Enum.filter(fn [guard_start_position, location] ->
+      obstacle_causes_loop?(location, map, guard_start_position) and
+        obstacle_causes_loop?(location, map, starting_position)
+    end)
+    |> Enum.map(fn [_guard_start_position, location] -> location end)
+    |> Enum.sort()
+    |> Enum.dedup()
+  end
+
+  defp obstacle_causes_loop?({row_index, col_index}, map, guard_start_position) do
+    map_with_obstacle = mark_tile(map, row_index, col_index, "O")
+    process_map_traversal(map_with_obstacle, guard_start_position) == nil
   end
 end
 
